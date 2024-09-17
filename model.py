@@ -2,19 +2,19 @@ import torch
 import torch.nn as nn 
 
 class DConv(nn.Module):
-    def __init__(self, input_channels, output_channels, kernel_size, stride, padding): 
+    def __init__(self, input_channels : int, output_channels : int, kernel_size : int, stride : int, padding : int): 
         super().__init__() 
         
         self.kxk_conv = nn.Conv2d(input_channels, input_channels, kernel_size=kernel_size, stride=stride, padding=padding)
         self.point_conv = nn.Conv2d(input_channels, output_channels, kernel_size=1, stride=1, padding=0)
         
-    def forward(self, x): 
+    def forward(self, x : torch.Tensor) -> torch.Tensor: 
         x = self.kxk_conv(x)
         output = self.point_conv(x)
         return output
     
 class DConvBlock(nn.Module): 
-    def __init__(self, input_channels, output_channels, kernel_size, stride, padding, activiation = 'relu'):
+    def __init__(self, input_channels : int, output_channels : int, kernel_size : int, stride : int, padding : int, activiation : str = 'relu'):
         super().__init__() 
         
         self.conv = DConv(input_channels, output_channels, kernel_size, stride, padding)
@@ -27,41 +27,41 @@ class DConvBlock(nn.Module):
         else: 
             self.activation = nn.Identity()
 
-    def forward(self, x): 
+    def forward(self, x: torch.Tensor) -> torch.Tensor: 
         x = self.conv(x)
         x - self.batch_norm(x)
         output = self.activation(x)
         return output
     
 class DownsampleConvBlock(nn.Module): 
-    def __init__(self, channels, num_blocks : int = 3): 
+    def __init__(self, channels : int, num_blocks : int = 3): 
         super().__init__()
         
         self.downsample = nn.MaxPool2d(kernel_size=2, stride=2)
         self.conv = nn.Sequential(*[DConvBlock(channels, channels, kernel_size=3, stride=1, padding=1, activiation='relu') 
                                    for i in range(num_blocks)])
     
-    def forward(self, x): 
+    def forward(self, x : torch.Tensor) -> torch.Tensor: 
         x = self.downsample(x)
         output = self.conv(x)
         return output, x
     
 class UpsampleConvBlock(nn.Module): 
-    def __init__(self, channels, num_blocks): 
+    def __init__(self, channels : int, num_blocks : int): 
         super().__init__() 
 
         self.upsample = nn.ConvTranspose2d(channels, channels, kernel_size=2, stride=2)
         self.conv = nn.Sequential(*[DConvBlock(channels, channels, kernel_size=3, stride=1, padding=1, activiation='relu') 
                                    for i in range(num_blocks)])
     
-    def forward(self, x, residual): 
+    def forward(self, x : torch.Tensor, residual : torch.Tensor): 
         x+=residual
         x = self.upsample(x)
         output = self.conv(x)
         return output
     
 class HourGlassModule(nn.Module):
-    def __init__(self, channels, depth, num_blocks=3):
+    def __init__(self, channels : int, depth : int, num_blocks : int = 3):
         super().__init__()
         self.depth = depth
         self.downsample = []
@@ -74,7 +74,7 @@ class HourGlassModule(nn.Module):
         self.downsample = nn.ModuleList(self.downsample)
         self.upsample = nn.ModuleList(self.upsample)
 
-    def forward(self, x):
+    def forward(self, x : torch.Tensor) -> torch.Tensor:
         residuals = []
 
         for i in range(self.depth):
@@ -87,7 +87,7 @@ class HourGlassModule(nn.Module):
         return x
     
 class StackedHourGlass(nn.Module): 
-    def __init__(self, input_channels, num_modules, num_depth, num_blocks, num_keypoints): 
+    def __init__(self, input_channels : int, num_modules : int, num_depth : int, num_blocks : int, num_keypoints : int = 17): 
         super().__init__()
         
         self.feature_extractor = nn.Sequential(*[
@@ -112,7 +112,7 @@ class StackedHourGlass(nn.Module):
         self.output_convs = nn.Sequential(*[nn.ConvTranspose2d(256, 256, kernel_size=2, stride=2), 
                                             nn.Conv2d(256, num_keypoints, kernel_size=3, stride=1, padding=1)])
     
-    def forward(self, x):  
+    def forward(self, x : torch.Tensor) -> torch.Tensor:  
         x = self.feature_extractor(x)
         x = self.hourGlassStem(x)
         x = self.intermediate_convs(x)
