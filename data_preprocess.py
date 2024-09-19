@@ -4,8 +4,11 @@ import argparse
 import os
 from collections import defaultdict
 import numpy as np
+from tqdm import tqdm
 
 def main(root_dir: str, mode: str, annotations_dir: str):
+    patch_size = 256
+    
     with open(annotations_dir, 'r') as file:
         annotations = json.load(file)
 
@@ -24,7 +27,7 @@ def main(root_dir: str, mode: str, annotations_dir: str):
 
     iteration = 0
 
-    for img_id in image_id_to_info.keys():
+    for img_id in tqdm(image_id_to_info.keys()):
         img_info = image_id_to_info[img_id]
         file_name = img_info['file_name']
         width, height = img_info['width'], img_info['height']
@@ -34,15 +37,17 @@ def main(root_dir: str, mode: str, annotations_dir: str):
         annotations_for_img = annotations_per_image[img_id]
 
         for ann in annotations_for_img:
-            if ann['num_keypoints'] > 0:
+            if ann['num_keypoints'] > 15:
                 keypoints = np.array(ann['keypoints']).reshape(-1, 3)
 
                 bbox = ann['bbox']
                 x_min, y_min, box_width, box_height = bbox
                 x_max = x_min + box_width
                 y_max = y_min + box_height
+                
+                scale_width, scale_height = patch_size / box_width, patch_size / box_height
 
-                img_crop = img.crop((x_min, y_min, x_max, y_max))
+                img_crop = img.crop((x_min, y_min, x_max, y_max)).resize((patch_size, patch_size))
 
                 img_filename = f"{str(iteration).zfill(7)}.jpg"
                 img_crop.save(os.path.join(images_dir, img_filename))
@@ -50,13 +55,9 @@ def main(root_dir: str, mode: str, annotations_dir: str):
                 kp_filename = f"{str(iteration).zfill(7)}.txt"
                 with open(os.path.join(keypoints_dir, kp_filename), 'w') as kp_file:
                     for kp in keypoints:
-                        kp_file.write(f"{kp[0]} {kp[1]} {kp[2]}\n")
+                        kp_file.write(f"{kp[0] * scale_width} {kp[1] * scale_height} {kp[2]}\n")
 
                 iteration += 1
-
-        if iteration >= 1e6:
-            print("Completed cropping for 1 million images")
-            break
 
     print(f"Total cropped images: {iteration}")
     
