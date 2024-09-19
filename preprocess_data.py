@@ -14,8 +14,8 @@ def main(root_dir: str, mode: str, annotations_dir: str):
 
     img_dir = os.path.join(root_dir, f"{mode}2017")
 
-    images_dir = os.path.join(root_dir, 'cropped_images')
-    keypoints_dir = os.path.join(root_dir, 'keypoints')
+    images_dir = os.path.join(root_dir, f'{mode}_cropped_images')
+    keypoints_dir = os.path.join(root_dir, f'{mode}_keypoints')
     os.makedirs(images_dir, exist_ok=True)
     os.makedirs(keypoints_dir, exist_ok=True)
 
