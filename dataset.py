@@ -123,3 +123,19 @@ class HPEDataset(Dataset):
         }
         
         return img, target
+
+class HPESingle(Dataset): 
+    def __init__(self, root_dir : str, mode : str, patch_size : int): 
+        super().__init__() 
+        
+        self.root_dir = os.path.join(root_dir, f"{mode}2017")
+        
+        annotations_json = os.path.join(root_dir, "annotations", f"person_keypoints_{mode}2017.json")
+        with open(annotations_json, 'r') as file: 
+            self.annotations = json.load(annotations_json)
+            
+    def __len__(self): 
+        return len(self.root_dir)
+    
+    def __getitem__(self, index):
+        return None
