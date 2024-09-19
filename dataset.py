@@ -9,7 +9,9 @@ import os
 import json
 from collections import defaultdict
 from typing import Dict, List
+from glob import glob
 
+# For unaltered COCO dataset with multiple HPE targets and BBox
 class HPEDataset(Dataset):
     def __init__(self, root_dir : str, mode : str, patch_size : int):
         super().__init__()
@@ -124,18 +126,41 @@ class HPEDataset(Dataset):
         
         return img, target
 
+# For converted COCO dataset with only one HPE target per sample
 class HPESingle(Dataset): 
     def __init__(self, root_dir : str, mode : str, patch_size : int): 
         super().__init__() 
         
-        self.root_dir = os.path.join(root_dir, f"{mode}2017")
+        self.img_dir = glob(os.path.join(root_dir, f"{mode}/*.jpg"))
+        self.ann_dir = glob(os.path.join(root_dir, f"{mode}/*.txt"))
         
-        annotations_json = os.path.join(root_dir, "annotations", f"person_keypoints_{mode}2017.json")
-        with open(annotations_json, 'r') as file: 
-            self.annotations = json.load(annotations_json)
+        self.transform = T.Compose([
+            T.Resize((patch_size, patch_size)), 
+            T.GaussianBlur(kernel_size=(3,3)),
+            T.ToTensor()
+        ])
+        
+        self.patch_size = patch_size
             
     def __len__(self): 
-        return len(self.root_dir)
+        return len(self.img_dir)
     
     def __getitem__(self, index):
-        return None
+        # Load image 
+        img = Image.open(self.img_dir[index]).convert("RGB")
+        width, height = img.size
+        
+        # Determine scale width and height for img pose coordinates
+        scale_width, scale_height = self.patch_size / width, self.patch_size / height
+
+        # Open corresponding annotation txt and scale x, y positione
+        with open(self.ann_dir[index], 'r') as f:
+            data = [[float(x) for x in line.strip().split()] for line in f]
+            data[:, 0] *= scale_width
+            data[:, 1] *- scale_height
+        
+        # Convert data to tensors  
+        img_tensor = self.transform(img)
+        ann_tensor = torch.Tensor(data)
+        
+        return img_tensor, ann_tensor  
