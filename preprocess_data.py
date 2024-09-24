@@ -55,7 +55,10 @@ def main(root_dir: str, mode: str, annotations_dir: str):
                 kp_filename = f"{str(iteration).zfill(7)}.txt"
                 with open(os.path.join(keypoints_dir, kp_filename), 'w') as kp_file:
                     for kp in keypoints:
-                        kp_file.write(f"{kp[0] * scale_width} {kp[1] * scale_height} {kp[2]}\n")
+                        if (kp[2] == 2):
+                            kp_file.write(f"{kp[0] * scale_width} {kp[1] * scale_height}\n")
+                        else: 
+                            kp_file.write(f"{0} {0}\n")
 
                 iteration += 1
 
