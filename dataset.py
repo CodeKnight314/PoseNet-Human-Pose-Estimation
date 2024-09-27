@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms.functional as F
 import torchvision.transforms as T
 
@@ -145,3 +145,19 @@ class HPESingle(Dataset):
         ann_tensor = torch.Tensor(data)
         
         return img_tensor, ann_tensor  
+    
+def get_HPESingle(root_dir : str, mode : str, patch_size : int, batch_size : int):
+    """
+    Helper Function for getting HPESingle Dataset
+    
+    Args: 
+        root_dir (str): directory containing train/ and val/ folders. 
+        mode (str): to specify which train/val/test split to use from root_dir
+        patch_size (int): dimensions to resize HPE image into
+        batch_size (int): number of training samples per iteration
+        
+    Return: 
+        DataLoader: DataLoader for training/validating model
+    """
+    dataset = HPEDataset(root_dir, mode, patch_size)
+    return DataLoader(dataset, batch_size, shuffle=True, num_workers=os.cpu_count())
