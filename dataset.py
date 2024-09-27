@@ -116,8 +116,8 @@ class HPESingle(Dataset):
     def __init__(self, root_dir : str, mode : str, patch_size : int): 
         super().__init__() 
         
-        self.img_dir = glob(os.path.join(root_dir, f"{mode}/*.jpg"))
-        self.ann_dir = glob(os.path.join(root_dir, f"{mode}/*.txt"))
+        self.img_dir = glob(os.path.join(root_dir, f"{mode}/{mode}_cropped_images/*.jpg"))
+        self.ann_dir = glob(os.path.join(root_dir, f"{mode}/{mode}_keypoints/*.txt"))
         
         self.transform = T.Compose([
             T.Resize((patch_size, patch_size)), 
