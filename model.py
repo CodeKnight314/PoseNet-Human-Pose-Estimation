@@ -1,5 +1,6 @@
 import torch 
 import torch.nn as nn 
+import torch.nn.functional as F
 
 class DConv(nn.Module):
     def __init__(self, input_channels : int, output_channels : int, kernel_size : int, stride : int, padding : int): 
@@ -117,4 +118,9 @@ class StackedHourGlass(nn.Module):
         x = self.hourGlassStem(x)
         x = self.intermediate_convs(x)
         output = self.output_convs(x)
+        
+        batch_size, num_keypoints, height, width = output.shape
+        output = output.view(batch_size, num_keypoints, -1)
+        output = F.softmax(output, dim=2)
+        output = output.view(batch_size, num_keypoints, height, width)
         return output
