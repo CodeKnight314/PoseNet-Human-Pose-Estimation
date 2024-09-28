@@ -28,6 +28,17 @@ def load_optimizer(model: torch.nn.Module, opt: str, lr: float):
     else:
         raise ValueError(f"Unsupported optimizer type: {opt}")
 
+def get_predicted_coords(heatmaps):
+    batch_size, num_keypoints, height, width = heatmaps.shape
+    
+    x_grid = torch.arange(width).view(1, 1, 1, width).to(heatmaps.device)
+    y_grid = torch.arange(height).view(1, 1, height, 1).to(heatmaps.device)
+
+    x = (heatmaps * x_grid).sum(dim=(2, 3))
+    y = (heatmaps * y_grid).sum(dim=(2, 3))
+
+    coordinates = torch.stack((x, y), dim=2)
+    return coordinates
 
 def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output_dir):
     criterion = SmoothL1Loss(alpha=0.5, beta=0.5)
@@ -47,6 +58,7 @@ def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output
                 
                 optimizer.zero_grad()
                 prediction = model(img)
+                prediction = get_predicted_coords(prediction)
                 
                 loss = criterion(prediction, ann)
                 loss.backward()
@@ -62,6 +74,7 @@ def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output
                     img, ann = img.to(device), ann.to(device)
                     
                     prediction = model(img)
+                    prediction = get_predicted_coords(prediction)
                     
                     loss = criterion(prediction, ann)
                     total_valid_loss += loss.item()
