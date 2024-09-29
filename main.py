@@ -44,7 +44,7 @@ def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output
     criterion = SmoothL1Loss(alpha=0.5, beta=0.5)
     
     logger = LOGWRITER(output_directory=output_dir, total_epochs=epochs)
-    es_mech = EarlyStopMechanism(save_path=os.path.join(output_dir, "saved_weights"))
+    es_mech = EarlyStopMechanism(metric_threshold=0.05, save_path=os.path.join(output_dir, "saved_weights"))
     
     try:
         logger.write(f"Starting training on device {device} for {epochs} epochs.")

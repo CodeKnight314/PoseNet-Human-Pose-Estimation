@@ -41,7 +41,7 @@ class HPEDataset(Dataset):
     def __len__(self):
         return len(self.img_ids)
 
-    def __getitem__(self, index : int) -> List[torch.Tensor, Dict[str : torch.Tensor]]:
+    def __getitem__(self, index : int):
         img_id = self.img_ids[index]
         img_info = self.image_id_to_info[img_id]
         file_name = img_info['file_name']
@@ -137,7 +137,7 @@ class HPESingle(Dataset):
         scale_width, scale_height = self.patch_size / width, self.patch_size / height
 
         with open(self.ann_dir[index], 'r') as f:
-            data = [[float(x) for x in line.strip().split()] for line in f]
+            data = np.array([[float(x) for x in line.strip().split()[:2]] for line in f])
             data[:, 0] *= scale_width
             data[:, 1] *- scale_height
         
@@ -159,5 +159,5 @@ def get_HPESingle(root_dir : str, mode : str, patch_size : int, batch_size : int
     Return: 
         DataLoader: DataLoader for training/validating model
     """
-    dataset = HPEDataset(root_dir, mode, patch_size)
+    dataset = HPESingle(root_dir, mode, patch_size)
     return DataLoader(dataset, batch_size, shuffle=True, num_workers=os.cpu_count())
