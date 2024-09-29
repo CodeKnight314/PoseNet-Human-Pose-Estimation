@@ -56,7 +56,7 @@ class UpsampleConvBlock(nn.Module):
                                    for i in range(num_blocks)])
     
     def forward(self, x : torch.Tensor, residual : torch.Tensor): 
-        x+=residual
+        x = x + residual
         x = self.upsample(x)
         output = self.conv(x)
         return output
