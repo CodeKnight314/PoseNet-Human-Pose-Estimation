@@ -5,8 +5,8 @@ class SmoothL1Loss(nn.Module):
     def __init__(self, alpha : float = 0.5, beta : float = 0.5): 
         super().__init__() 
         
-        self.l1_loss = nn.L1Loss()
-        self.l2_loss = nn.MSELoss()
+        self.l1_loss = nn.L1Loss(reduction='mean')
+        self.l2_loss = nn.MSELoss(reduction='mean')
         self.alpha = alpha
         self.beta = beta
         
