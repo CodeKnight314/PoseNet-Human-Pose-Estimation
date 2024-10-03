@@ -32,35 +32,45 @@ def main(root_dir: str, mode: str, annotations_dir: str):
         file_name = img_info['file_name']
         width, height = img_info['width'], img_info['height']
         img_path = os.path.join(img_dir, file_name)
-        img = Image.open(img_path).convert("RGB")
 
-        annotations_for_img = annotations_per_image[img_id]
+        try:
+            img = Image.open(img_path).convert("RGB")
+    
+            annotations_for_img = annotations_per_image[img_id]
+    
+            for ann in annotations_for_img:
+                if ann['num_keypoints'] > 15:
+                    keypoints = np.array(ann['keypoints']).reshape(-1, 3)
+    
+                    bbox = ann['bbox']
+                    x_min, y_min, box_width, box_height = bbox
+                    x_max = x_min + box_width
+                    y_max = y_min + box_height
+                    
+                    scale_width, scale_height = patch_size / box_width, patch_size / box_height
+    
+                    img_crop = img.crop((x_min, y_min, x_max, y_max)).resize((patch_size, patch_size))
+    
+                    img_filename = f"{str(iteration).zfill(7)}.jpg"
+                    img_crop.save(os.path.join(images_dir, img_filename))
+    
+                    kp_filename = f"{str(iteration).zfill(7)}.txt"
+                    with open(os.path.join(keypoints_dir, kp_filename), 'w') as kp_file:
+                        for kp in keypoints:
+                            if kp[2] == 2: 
+                                kp_rel_x = kp[0] - x_min
+                                kp_rel_y = kp[1] - y_min
 
-        for ann in annotations_for_img:
-            if ann['num_keypoints'] > 15:
-                keypoints = np.array(ann['keypoints']).reshape(-1, 3)
+                                kp_scaled_x = kp_rel_x * scale_width
+                                kp_scaled_y = kp_rel_y * scale_height
 
-                bbox = ann['bbox']
-                x_min, y_min, box_width, box_height = bbox
-                x_max = x_min + box_width
-                y_max = y_min + box_height
-                
-                scale_width, scale_height = patch_size / box_width, patch_size / box_height
-
-                img_crop = img.crop((x_min, y_min, x_max, y_max)).resize((patch_size, patch_size))
-
-                img_filename = f"{str(iteration).zfill(7)}.jpg"
-                img_crop.save(os.path.join(images_dir, img_filename))
-
-                kp_filename = f"{str(iteration).zfill(7)}.txt"
-                with open(os.path.join(keypoints_dir, kp_filename), 'w') as kp_file:
-                    for kp in keypoints:
-                        if (kp[2] == 2):
-                            kp_file.write(f"{kp[0] * scale_width} {kp[1] * scale_height}\n")
-                        else: 
-                            kp_file.write(f"{0} {0}\n")
-
-                iteration += 1
+                                kp_file.write(f"{kp_scaled_x} {kp_scaled_y}\n")
+                            else:
+                                kp_file.write(f"{0} {0}\n")
+    
+                    iteration += 1
+        except:
+            continue
 
     print(f"Total cropped images: {iteration}")
     
