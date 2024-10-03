@@ -30,7 +30,7 @@ class DConvBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor: 
         x = self.conv(x)
-        x - self.batch_norm(x)
+        x = self.batch_norm(x)
         output = self.activation(x)
         return output
     
@@ -65,15 +65,9 @@ class HourGlassModule(nn.Module):
     def __init__(self, channels : int, depth : int, num_blocks : int = 3):
         super().__init__()
         self.depth = depth
-        self.downsample = []
-        self.upsample = []
         
-        for _ in range(self.depth):
-            self.downsample.append(DownsampleConvBlock(channels, num_blocks))
-            self.upsample.append(UpsampleConvBlock(channels, num_blocks))
-        
-        self.downsample = nn.ModuleList(self.downsample)
-        self.upsample = nn.ModuleList(self.upsample)
+        self.downsample = nn.ModuleList([DownsampleConvBlock(channels, num_blocks) for _ in range(self.depth)])
+        self.upsample = nn.ModuleList([UpsampleConvBlock(channels, num_blocks) for _ in range(self.depth)])
 
     def forward(self, x : torch.Tensor) -> torch.Tensor:
         residuals = []
