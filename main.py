@@ -29,15 +29,18 @@ def load_optimizer(model: torch.nn.Module, opt: str, lr: float):
         raise ValueError(f"Unsupported optimizer type: {opt}")
 
 def get_predicted_coords(heatmaps):
+    """
+    """
     batch_size, num_keypoints, height, width = heatmaps.shape
     
-    x_grid = torch.arange(width).view(1, 1, 1, width).to(heatmaps.device)
-    y_grid = torch.arange(height).view(1, 1, height, 1).to(heatmaps.device)
+    x_grid = torch.linspace(0, width - 1, steps=width).view(1, 1, 1, width).to(heatmaps.device)
+    y_grid = torch.linspace(0, height - 1, steps=height).view(1, 1, height, 1).to(heatmaps.device)
 
     x = (heatmaps * x_grid).sum(dim=(2, 3))
     y = (heatmaps * y_grid).sum(dim=(2, 3))
 
     coordinates = torch.stack((x, y), dim=2)
+    
     return coordinates
 
 def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output_dir):
