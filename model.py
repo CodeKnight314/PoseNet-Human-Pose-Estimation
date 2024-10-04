@@ -124,7 +124,7 @@ class ConvBlock(nn.Module):
         super().__init__()
         self.conv = nn.Conv2d(input_channels, output_channels, kernel_size=3, stride=1, padding=1)
         self.batchnorm = nn.BatchNorm2d(output_channels)
-    
+
     def forward(self, x):
         x = self.conv(x)
         x = self.batchnorm(x)
@@ -147,7 +147,7 @@ class SEBlock(nn.Module):
         out = self.fc2(out)
         out = self.sigmoid(out)
         return x * out
-    
+
 class MBConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, expand_ratio, kernel_size, stride, se_ratio):
         super(MBConvBlock, self).__init__()
@@ -213,14 +213,14 @@ class FusedMBConvBlock(nn.Module):
         if self.use_residual:
             x = x + identity
         return x
-    
+
 class KeypointHead(nn.Module):
     def __init__(self, in_channels, num_keypoints):
         super(KeypointHead, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(in_channels, num_keypoints, kernel_size=1)
-        
+
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
@@ -243,7 +243,7 @@ class EfficientNetV2(nn.Module):
             MBConvBlock(48, 64, expand_ratio=4, kernel_size=3, stride=2, se_ratio=0.25),
             MBConvBlock(64, 128, expand_ratio=6, kernel_size=3, stride=2, se_ratio=0.25),
             MBConvBlock(128, 160, expand_ratio=6, kernel_size=3, stride=1, se_ratio=0.25),
-            MBConvBlock(160, 256, expand_ratio=6, kernel_size=3, stride=2, se_ratio=0.25)
+            MBConvBlock(160, 256, expand_ratio=6, kernel_size=3, stride=1, se_ratio=0.25)
         )
 
         self.head = KeypointHead(256, num_keypoints)
