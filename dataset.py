@@ -139,7 +139,7 @@ class HPESingle(Dataset):
         with open(self.ann_dir[index], 'r') as f:
             data = np.array([[float(x) for x in line.strip().split()[:2]] for line in f])
             data[:, 0] *= scale_width
-            data[:, 1] *- scale_height
+            data[:, 1] *= scale_height
         
         img_tensor = self.transform(img)
         ann_tensor = torch.Tensor(data)
