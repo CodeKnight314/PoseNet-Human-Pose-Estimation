@@ -1,4 +1,4 @@
-from model import StackedHourGlass
+from model import get_ResNetPose
 from dataset import get_HPESingle
 from loss import SmoothL1Loss
 from utils.early_stop import EarlyStopMechanism
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
-    model = StackedHourGlass(input_channels=3, num_modules=4, num_blocks=2, num_depth=3, num_keypoints=17).to(device)
+    model = get_ResNetPose(args.model_pth)
     
     optimizer = load_optimizer(model, args.opt, args.lr)
     
