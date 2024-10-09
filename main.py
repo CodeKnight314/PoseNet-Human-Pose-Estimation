@@ -44,7 +44,7 @@ def get_predicted_coords(heatmaps):
     return coordinates
 
 def HPE(model, optimizer, lr_scheduler, train_dl, val_dl, epochs, device, output_dir):
-    criterion = SmoothL1Loss(alpha=0.5, beta=0.5)
+    criterion = SmoothL1Loss(beta=1.0)
     
     logger = LOGWRITER(output_directory=output_dir, total_epochs=epochs)
     es_mech = EarlyStopMechanism(metric_threshold=0.05, save_path=os.path.join(output_dir, "saved_weights"))
