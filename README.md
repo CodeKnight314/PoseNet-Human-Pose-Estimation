@@ -1,25 +1,25 @@
-# Hour-Glass-2D-Human-Pose-Estimation
+# PoseNet-2D-Human-Pose-Estimation
 
 ## Overview
 
-This repository contains the implementation of the Stacked HourGlass model for single-person Human-Pose-Estimation (HPE). The training dataset used is sourced from COCO train2017 and is filtered to only include samples with more than 15 keypoints shown in cropped pictures. Individual images are resized to 256 by 256 pixels for easy stacking. This repository is intended for educational purposes to illustrate the model design of Stacked HourGlass Modules in HPE context as well as its performance when tested on COCO.
+This repository contains the implementation of the PoseNet model for single-person Human-Pose-Estimation (HPE). The training dataset used is sourced from COCO train2017 and is filtered to only include samples with more than 15 keypoints shown in cropped pictures. Individual images are resized to 512 by 512 pixels for easy stacking. This repository is intended for educational purposes to illustrate the model design of Stacked HourGlass Modules in HPE context as well as its performance when tested on COCO.
 
 ## Installation
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/CodeKnight314/Hour-Glass-2D-Human-Pose-Estimation.git
+    git clone https://github.com/CodeKnight314/PoseNet-Human-Pose-Estimation.git
     ```
 
 2. Create and activate a virtual environment (optional but recommended):
     ```bash
-    python -m venv hourglass-env
-    source hourglass-env/bin/activate
+    python -m venv PoseNet-env
+    source PoseNet-env/bin/activate
     ```
 
 3. cd to project directory: 
     ```bash 
-    cd Hour-Glass-2D-Human-Pose-Estimation/
+    cd PoseNet-Human-Pose-Estimation/
     ```
 
 4. Install the required packages:
