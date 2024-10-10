@@ -85,19 +85,21 @@ class ResNetPose(nn.Module):
         if(weights): 
             self.backbone.load_state_dict(torch.load(weights, weights_only=True))
         self.backbone.classifier_head = nn.Identity()
-        
-        self.keypoint_conv = nn.Conv2d(512, num_keypoints, kernel_size=1, stride=1, padding=0)
-        
-        self.upsample = nn.Upsample(scale_factor=32, mode='bilinear', align_corners=False)
+                
+        self.fc_keypoints = nn.Sequential(
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(),
+            nn.Linear(512, num_keypoints * 2)  # Predict (x, y) coordinates for each keypoint
+        )
+
+        self.num_keypoints = num_keypoints
         
     def forward(self, x):
         features = self.backbone(x)
         
-        heatmaps = self.keypoint_conv(features)
+        keypoints = self.fc_keypoints(features).view(-1, self.num_keypoints, 2)
         
-        heatmaps = self.upsample(heatmaps)
-        
-        return heatmaps
+        return keypoints
 
 def get_ResNetPose(weights : str = None):
     """
