@@ -1,4 +1,4 @@
-from model import StackedHourGlass
+from model import ResNetPose
 import argparse
 import torch 
 import matplotlib.pyplot as plt
@@ -38,7 +38,7 @@ def extract_keypoints_subpixel(heatmaps):
 
 def inference(input_dir : str, output_dir : str, path : str = None):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = StackedHourGlass().to(device)
+    model = ResNetPose().to(device)
     if path: 
         model.load_state_dict(torch.load(path, map_location=device))
         
@@ -51,8 +51,7 @@ def inference(input_dir : str, output_dir : str, path : str = None):
         with torch.no_grad(): 
             prediction = model(img_tensor).squeeze(0)
             
-        keypoints = extract_keypoints_subpixel(prediction)
-        
+        keypoints = prediction.detach().numpy()        
         plt.imshow(Image.open(img))
         for x, y in keypoints: 
             plt.plot(x, y, 'ro')
