@@ -4,6 +4,14 @@
 
 This repository contains the implementation of the PoseNet model for single-person Human-Pose-Estimation (HPE). The training dataset used is sourced from COCO train2017 and is filtered to only include samples with more than 15 keypoints shown in cropped pictures. Individual images are resized to 512 by 512 pixels for easy stacking. This repository is intended for educational purposes to illustrate the model design of Stacked HourGlass Modules in HPE context as well as its performance when tested on COCO.
 
+## Results: 
+As seen from below, PoseNet performs adequately when estimating single human pose. Smoothed L1 Loss for COCO validation was at 26.31 for all  17 keypoints which is fairly well.
+<p align="center">
+  <img src="images/Sample.png" alt="Your image alt text">
+  <br>
+  <em> Accurate 17 point Pose Estimation</em>
+</p>
+
 ## Installation
 
 1. Clone the repository:
